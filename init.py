@@ -95,7 +95,7 @@ class VideoConverterApp(tk.Tk):
         x1, y1, x2, y2 = self.crop_area
         video = video.crop(x1, y1, x2, y2)
 
-        video.write_videofile(output_file, codec='libx264', fps=video.fps, audio_codec='aac', preset='ultrafast')
+        video.write_videofile(output_file, codec='mpeg4', fps=video.fps, audio=False, preset='ultrafast')
         messagebox.showinfo("Success", "Video conversion complete.")
 
 class CropSelector:
