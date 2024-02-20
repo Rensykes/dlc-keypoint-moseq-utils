@@ -1,0 +1,18 @@
+# Virtual environment
+PyDeo/
+
+# Byte-compiled / optimized Python files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# IDE-specific files
+.vscode/
+*.pyc
+
+# Environment configuration files
+.env
+
+# Others
+*.mp4
