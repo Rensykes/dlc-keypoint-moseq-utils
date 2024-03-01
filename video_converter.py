@@ -1,9 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
 from moviepy.editor import VideoFileClip
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
-from matplotlib.patches import Rectangle
+from crop_selector import CropSelector
 
 class VideoConverterApp(tk.Tk):
     def __init__(self):
@@ -54,11 +52,6 @@ class VideoConverterApp(tk.Tk):
         if input_path:
             self.input_path_entry.delete(0, tk.END)
             self.input_path_entry.insert(0, input_path)
-    # def browse_input_path(self):
-    #     input_path = filedialog.askopenfilename()
-    #     if input_path:
-    #         self.input_path_entry.delete(0, tk.END)
-    #         self.input_path_entry.insert(0, input_path)
 
     def browse_output_path(self):
         output_path = filedialog.askdirectory()
@@ -93,47 +86,31 @@ class VideoConverterApp(tk.Tk):
         video = VideoFileClip(input_path)
 
         x1, y1, x2, y2 = self.crop_area
-        width = x2 - x1
-        height = y2 - y1
 
-        # Ensure width and height are even
-        if width % 2 != 0:
-            x2 -= 1
-        if height % 2 != 0:
-            y2 -= 1
+        x1, y1, x2, y2 = self.check_even_dimensions(x1, y1, x2, y2)
 
         video = video.crop(x1, y1, x2, y2)
 
         video.write_videofile(output_file, codec='libx264', fps=video.fps, audio_codec='aac', preset='ultrafast')
         messagebox.showinfo("Success", "Video conversion complete.")
 
-class CropSelector:
-    def __init__(self, video_path):
-        self.video = VideoFileClip(video_path)
-        self.frame = self.video.get_frame(0)
-        self.crop_area = None
+    '''
+    Utility method used to check if the width and height of the cropped video are even.
+    https://zulko.github.io/moviepy/FAQ.html#moviepy-generated-a-video-that-cannot-be-read-by-my-favorite-player
+    One of the video s dimensions were not even, for instance 720x405, and you used a MPEG4 codec like libx264 (default in MoviePy). 
+    In this case the video generated uses a format that is readable only on some readers like VLC.
+    '''
+    def check_even_dimensions(x1, y1, x2, y2):
+        width = x2 - x1
+        height = y2 - y1
 
-    def select_crop_area(self):
-        fig, ax = plt.subplots()
-        ax.imshow(self.frame)
-        plt.title('Select crop area by clicking and dragging')
+        print("Selected width: " + str(width) + " Selected height: " + str(height))
+        # Ensure width and height are even
+        if width % 2 != 0:
+            x2 -= 1
+            print("Width not even, reducing it by 1")
+        if height % 2 != 0:
+            y2 -= 1
+            print("Width not even, reducing it by 1")
 
-        def on_click(event):
-            self.x1, self.y1 = event.xdata, event.ydata
-
-        def on_release(event):
-            self.x2, self.y2 = event.xdata, event.ydata
-            self.crop_area = (int(self.x1), int(self.y1), int(self.x2), int(self.y2))
-            ax.add_patch(Rectangle((self.x1, self.y1), self.x2 - self.x1, self.y2 - self.y1, linewidth=1, edgecolor='r', facecolor='none'))
-            fig.canvas.draw()
-
-        fig.canvas.mpl_connect('button_press_event', on_click)
-        fig.canvas.mpl_connect('button_release_event', on_release)
-
-        plt.show()
-
-        return self.crop_area
-
-if __name__ == "__main__":
-    app = VideoConverterApp()
-    app.mainloop()
+        return x1, y1, x2, y2

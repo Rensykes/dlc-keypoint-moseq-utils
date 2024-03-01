@@ -1,5 +1,4 @@
 import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
 from matplotlib.patches import Rectangle
 from moviepy.editor import VideoFileClip
 
@@ -29,31 +28,3 @@ class CropSelector:
         plt.show()
 
         return self.crop_area
-
-from PIL import Image
-
-def convert_video(input_path, output_path, target_format='mp4', crop=None, resize=None):
-    video = VideoFileClip(input_path)
-
-    if crop:
-        x1, y1, x2, y2 = crop
-        video = video.crop(x1, y1, x2, y2)
-
-    if resize:
-        width, height = resize
-        # Specify resampling method here (e.g., Image.BILINEAR, Image.BICUBIC)
-        video = video.resize((width, height))
-
-    video.write_videofile(output_path)
-
-# Example usage:
-input_path = 'video1.mp4'
-output_path = 'output_video.mp4'
-
-selector = CropSelector(input_path)
-crop_area = selector.select_crop_area()
-
-# Define resize dimensions (width, height) - optional
-resize_dimensions = (640, 480)
-
-convert_video(input_path, output_path, crop=crop_area, resize=resize_dimensions)
