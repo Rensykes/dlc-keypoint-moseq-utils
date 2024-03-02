@@ -3,19 +3,38 @@ import os
 from tkinter import filedialog, messagebox
 from moviepy.editor import VideoFileClip
 from crop_selector import CropSelector
-from PIL import Image, ImageTk  # Import Image module from PIL
+from PIL import Image, ImageTk
 
 class VideoConverterApp(tk.Tk):
     def __init__(self):
         super().__init__()
-
         self.title("Video Converter")
-        self.get_icon("question-mark.png")  # Load the icon and save it as a class attribute to avoid garbage collection by maintaining reference
+        self.load_icons()
 
         self.padding_x = 10
         self.padding_y = 2
         self.width = 50
 
+        self.create_widgets()
+
+        self.crop_area = None
+
+    def load_icons(self):
+        icons_folder = os.path.join("assets", "icons")
+        icon_path = os.path.join(icons_folder, "question-mark.png")
+        icon = Image.open(icon_path).resize((20, 20), Image.ANTIALIAS)
+        self.help_icon = ImageTk.PhotoImage(icon)
+
+    def create_widgets(self):
+        self.create_input_widgets()
+        self.create_output_widgets()
+        self.create_name_widgets()
+        self.create_format_widgets()
+        self.create_info_widgets()
+        self.create_crop_widgets()
+        self.create_conversion_widgets()
+
+    def create_input_widgets(self):
         self.input_path_label = tk.Label(self, text="Input Video Path:")
         self.input_path_label.grid(row=0, column=0, padx=self.padding_x, pady=self.padding_y)
 
@@ -28,6 +47,7 @@ class VideoConverterApp(tk.Tk):
         self.input_path_help_button = tk.Button(self, image=self.help_icon, command=self.show_input_path_help)
         self.input_path_help_button.grid(row=0, column=3, padx=self.padding_x, pady=self.padding_y)
 
+    def create_output_widgets(self):
         self.output_path_label = tk.Label(self, text="Output Video Folder:")
         self.output_path_label.grid(row=1, column=0, padx=self.padding_x, pady=self.padding_y)
 
@@ -40,6 +60,7 @@ class VideoConverterApp(tk.Tk):
         self.output_path_help_button = tk.Button(self, image=self.help_icon, command=self.show_output_path_help)
         self.output_path_help_button.grid(row=1, column=3, padx=self.padding_x, pady=self.padding_y)
 
+    def create_name_widgets(self):
         self.name_label = tk.Label(self, text="Output Name:")
         self.name_label.grid(row=2, column=0, padx=self.padding_x, pady=self.padding_y)
 
@@ -49,6 +70,7 @@ class VideoConverterApp(tk.Tk):
         self.name_help_button = tk.Button(self, image=self.help_icon, command=self.show_name_help)
         self.name_help_button.grid(row=2, column=2, padx=self.padding_x, pady=self.padding_y)
 
+    def create_format_widgets(self):
         self.format_label = tk.Label(self, text="Output Format:")
         self.format_label.grid(row=3, column=0, padx=self.padding_x, pady=self.padding_y)
 
@@ -61,25 +83,24 @@ class VideoConverterApp(tk.Tk):
         self.format_help_button = tk.Button(self, image=self.help_icon, command=self.show_format_help)
         self.format_help_button.grid(row=3, column=2, padx=self.padding_x, pady=self.padding_y)
 
-        self.crop_button = tk.Button(self, text="Select Crop Area", command=self.select_crop_area)
-        self.crop_button.grid(row=4, column=0, columnspan=4, padx=self.padding_x, pady=self.padding_y)
-
-        self.convert_button = tk.Button(self, text="Convert", command=self.convert_video)
-        self.convert_button.grid(row=5, column=0, columnspan=4, padx=self.padding_x, pady=self.padding_y)
-
-        # FPS Label
+    def create_info_widgets(self):
         self.fps_label = tk.Label(self, text="FPS:")
-        self.fps_label.grid(row=6, column=0, padx=self.padding_x, pady=self.padding_y)
+        self.fps_label.grid(row=4, column=0, padx=self.padding_x, pady=self.padding_y)
         self.fps_value_label = tk.Label(self, text="")
-        self.fps_value_label.grid(row=6, column=1, padx=self.padding_x, pady=self.padding_y)
+        self.fps_value_label.grid(row=4, column=1, padx=self.padding_x, pady=self.padding_y)
 
-        # Size Label
         self.size_label = tk.Label(self, text="Size:")
-        self.size_label.grid(row=7, column=0, padx=self.padding_x, pady=self.padding_y)
+        self.size_label.grid(row=5, column=0, padx=self.padding_x, pady=self.padding_y)
         self.size_value_label = tk.Label(self, text="")
-        self.size_value_label.grid(row=7, column=1, padx=self.padding_x, pady=self.padding_y)
+        self.size_value_label.grid(row=5, column=1, padx=self.padding_x, pady=self.padding_y)
 
-        self.crop_area = None
+    def create_crop_widgets(self):
+        self.crop_button = tk.Button(self, text="Select Crop Area", command=self.select_crop_area)
+        self.crop_button.grid(row=6, column=0, columnspan=4, padx=self.padding_x, pady=self.padding_y)
+
+    def create_conversion_widgets(self):
+        self.convert_button = tk.Button(self, text="Convert", command=self.convert_video)
+        self.convert_button.grid(row=7, column=0, columnspan=4, padx=self.padding_x, pady=self.padding_y)
 
     def browse_input_path(self):
         input_path = filedialog.askopenfilename(filetypes=[("Video Files", "*.mp4 *.avi *.mkv *.mov")])
@@ -162,14 +183,6 @@ class VideoConverterApp(tk.Tk):
 
         return x1, y1, x2, y2
 
-    def get_icon(self, filename):
-        icons_folder = os.path.join("assets", "icons")  # Create a path to the "assets/icons" directory
-        icon_path = os.path.join(icons_folder, filename)  # Create the full path to the icon file
-        icon = Image.open(icon_path)  # Load the image file
-        icon = icon.resize((20, 20), Image.ANTIALIAS)  # Resize the image to desired dimensions
-        icon = ImageTk.PhotoImage(icon)  # Convert image to Tkinter PhotoImage
-        self.help_icon = icon
-
     def format_dropdown_callback(self, value):
         # Disable options other than "mp4"
         if value != "mp4":
@@ -183,3 +196,7 @@ class VideoConverterApp(tk.Tk):
         video = VideoFileClip(input_path)
         self.fps_value_label.config(text=f"{video.fps:.2f}")
         self.size_value_label.config(text=f"{video.size[0]} x {video.size[1]}")
+
+if __name__ == "__main__":
+    app = VideoConverterApp()
+    app.mainloop()
