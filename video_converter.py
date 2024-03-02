@@ -23,7 +23,7 @@ class VideoConverterApp(tk.Tk):
 
     def load_icons(self):
         icons_folder = os.path.join("assets", "icons")
-        icon_path = os.path.join(icons_folder, "question-mark.png")
+        icon_path = os.path.join(icons_folder, "question_mark_2.png")
         icon = Image.open(icon_path).resize((20, 20), Image.ANTIALIAS)
         self.help_icon = ImageTk.PhotoImage(icon)
 
@@ -47,7 +47,7 @@ class VideoConverterApp(tk.Tk):
         self.input_path_button = tk.Button(self, text="Browse", command=self.browse_input_path)
         self.input_path_button.grid(row=0, column=2, padx=self.padding_x, pady=self.padding_y)
         
-        self.input_path_help_button = tk.Button(self, image=self.help_icon, command=self.show_input_path_help)
+        self.input_path_help_button = tk.Button(self, image=self.help_icon, borderwidth=0, highlightthickness=0, relief=tk.FLAT, command=self.show_input_path_help)
         self.input_path_help_button.grid(row=0, column=3, padx=self.padding_x, pady=self.padding_y)
 
     def create_output_widgets(self):
@@ -60,7 +60,7 @@ class VideoConverterApp(tk.Tk):
         self.output_path_button = tk.Button(self, text="Browse", command=self.browse_output_path)
         self.output_path_button.grid(row=1, column=2, padx=self.padding_x, pady=self.padding_y)
 
-        self.output_path_help_button = tk.Button(self, image=self.help_icon, command=self.show_output_path_help)
+        self.output_path_help_button = tk.Button(self, image=self.help_icon, borderwidth=0, highlightthickness=0, relief=tk.FLAT, command=self.show_output_path_help)
         self.output_path_help_button.grid(row=1, column=3, padx=self.padding_x, pady=self.padding_y)
 
     def create_name_widgets(self):
@@ -70,7 +70,7 @@ class VideoConverterApp(tk.Tk):
         self.name_entry = tk.Entry(self, width=self.width)
         self.name_entry.grid(row=2, column=1, padx=self.padding_x, pady=self.padding_y)
 
-        self.name_help_button = tk.Button(self, image=self.help_icon, command=self.show_name_help)
+        self.name_help_button = tk.Button(self, image=self.help_icon, borderwidth=0, highlightthickness=0, relief=tk.FLAT, command=self.show_name_help)
         self.name_help_button.grid(row=2, column=2, padx=self.padding_x, pady=self.padding_y)
 
     def create_format_widgets(self):
@@ -83,7 +83,7 @@ class VideoConverterApp(tk.Tk):
         self.format_dropdown.config(width=self.width)  # Set the width of the OptionMenu
         self.format_dropdown.grid(row=3, column=1, padx=self.padding_x, pady=self.padding_y)
 
-        self.format_help_button = tk.Button(self, image=self.help_icon, command=self.show_format_help)
+        self.format_help_button = tk.Button(self, image=self.help_icon, borderwidth=0, highlightthickness=0, relief=tk.FLAT, command=self.show_format_help)
         self.format_help_button.grid(row=3, column=2, padx=self.padding_x, pady=self.padding_y)
 
     def create_info_widgets(self):
