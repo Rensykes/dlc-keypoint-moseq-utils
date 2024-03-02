@@ -1,5 +1,6 @@
 # Virtual environment
 PyDeo/
+dev/
 
 # Byte-compiled / optimized Python files
 __pycache__/

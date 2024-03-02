@@ -100,7 +100,7 @@ class VideoConverterApp(tk.Tk):
     One of the video s dimensions were not even, for instance 720x405, and you used a MPEG4 codec like libx264 (default in MoviePy). 
     In this case the video generated uses a format that is readable only on some readers like VLC.
     '''
-    def check_even_dimensions(x1, y1, x2, y2):
+    def check_even_dimensions(self, x1, y1, x2, y2):
         width = x2 - x1
         height = y2 - y1
 
