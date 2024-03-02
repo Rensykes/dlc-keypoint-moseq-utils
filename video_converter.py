@@ -19,6 +19,7 @@ class VideoConverterApp(tk.Tk):
         self.width = 50
 
         self.create_widgets()
+        self.create_menu()
         
         self.crop_area = None
 
@@ -29,6 +30,62 @@ class VideoConverterApp(tk.Tk):
         question_mark_icon_path = os.path.join(icons_folder, "question_mark_2.png")
         question_mark_icon = Image.open(question_mark_icon_path).resize((20, 20), Image.ANTIALIAS)
         self.help_icon = ImageTk.PhotoImage(question_mark_icon)
+
+    def create_menu(self):
+        """
+        Create menu bar.
+        """
+        menu_bar = tk.Menu(self)
+        
+        # Conversion menu
+        conversion_menu = tk.Menu(menu_bar, tearoff=0)
+        video_conversion_menu = tk.Menu(conversion_menu, tearoff=0)
+        video_conversion_menu.add_command(label="Convert Video", command=self.convert_video)
+        conversion_menu.add_cascade(label="Conversion", menu=conversion_menu)
+        menu_bar.add_cascade(label="Conversion", menu=video_conversion_menu)
+
+        
+        # Tools menu
+        tools_menu = tk.Menu(menu_bar, tearoff=0)
+        settings_menu = tk.Menu(tools_menu, tearoff=0)
+        settings_menu.add_command(label="Settings", command=self.open_settings_window)
+        tools_menu.add_cascade(label="Tools", menu=settings_menu)
+        menu_bar.add_cascade(label="Tools", menu=tools_menu)
+        
+        self.config(menu=menu_bar)
+
+    def open_settings_window(self):
+        """
+        Open a new window to display settings.
+        """
+        settings_window = tk.Toplevel(self)
+        settings_window.title("Settings")
+        
+        # Label and text area
+        label = tk.Label(settings_window, text="Default converted video prefix:")
+        label.grid(row=0, column=0, padx=10, pady=5, sticky="w")
+        text_area = tk.Text(settings_window, height=1, width=30)
+        text_area.grid(row=0, column=1, padx=10, pady=5, sticky="we")
+        
+        # Button with icon
+        def show_message():
+            messagebox.showinfo("Default converted video prefix", "When the input field Output Name is not filled, the video will be saved using the following format: <prefix>_<old_video_name>")
+
+        button = tk.Button(settings_window, image=self.help_icon, command=show_message)
+        button.grid(row=0, column=2, padx=10, pady=5)
+
+        # Apply and Cancel buttons
+        def apply_settings():
+            self.converted_video_prefix = text_area.get("1.0", "end-1c")
+            settings_window.destroy()
+
+        def cancel_settings():
+            settings_window.destroy()
+
+        apply_button = tk.Button(settings_window, text="Apply", command=apply_settings)
+        apply_button.grid(row=1, column=1, padx=5, pady=10, sticky="e")
+        cancel_button = tk.Button(settings_window, text="Cancel", command=cancel_settings)
+        cancel_button.grid(row=1, column=2, padx=5, pady=10, sticky="e")
 
     def create_widgets(self):
         self.create_input_widgets()
@@ -172,7 +229,10 @@ class VideoConverterApp(tk.Tk):
         video = video.crop(x1, y1, x2, y2)
 
         if output_name is None:
-            output_name = 'converted_' + input_path.split('/')[-1].split('.')[0]  # get name from input path
+            prefix = 'converted_'
+            if self.converted_video_prefix is not None:
+                prefix = self.converted_video_prefix + '_'
+            output_name = prefix + input_path.split('/')[-1].split('.')[0]  # get name from input path
 
         if output_path is None:
             output_path = '/'.join(input_path.split('/')[:-1])  # get folder from input path
