@@ -10,15 +10,16 @@ class VideoConverterApp(tk.Tk):
         super().__init__()
 
         self.title("Video Converter")
-        self.get_icon("question-mark.png")  # Load the icon and save it as a class attribute to avoid garbage collection by mantaining reference
+        self.get_icon("question-mark.png")  # Load the icon and save it as a class attribute to avoid garbage collection by maintaining reference
 
         self.padding_x = 10
         self.padding_y = 2
+        self.width = 50
 
         self.input_path_label = tk.Label(self, text="Input Video Path:")
         self.input_path_label.grid(row=0, column=0, padx=self.padding_x, pady=self.padding_y)
 
-        self.input_path_entry = tk.Entry(self, width=50)
+        self.input_path_entry = tk.Entry(self, width=self.width)
         self.input_path_entry.grid(row=0, column=1, padx=self.padding_x, pady=self.padding_y)
 
         self.input_path_button = tk.Button(self, text="Browse", command=self.browse_input_path)
@@ -27,11 +28,10 @@ class VideoConverterApp(tk.Tk):
         self.input_path_help_button = tk.Button(self, image=self.help_icon, command=self.show_input_path_help)
         self.input_path_help_button.grid(row=0, column=3, padx=self.padding_x, pady=self.padding_y)
 
-
         self.output_path_label = tk.Label(self, text="Output Video Folder:")
         self.output_path_label.grid(row=1, column=0, padx=self.padding_x, pady=self.padding_y)
 
-        self.output_path_entry = tk.Entry(self, width=50)
+        self.output_path_entry = tk.Entry(self, width=self.width)
         self.output_path_entry.grid(row=1, column=1, padx=self.padding_x, pady=self.padding_y)
 
         self.output_path_button = tk.Button(self, text="Browse", command=self.browse_output_path)
@@ -43,7 +43,7 @@ class VideoConverterApp(tk.Tk):
         self.name_label = tk.Label(self, text="Output Name:")
         self.name_label.grid(row=2, column=0, padx=self.padding_x, pady=self.padding_y)
 
-        self.name_entry = tk.Entry(self, width=50)
+        self.name_entry = tk.Entry(self, width=self.width)
         self.name_entry.grid(row=2, column=1, padx=self.padding_x, pady=self.padding_y)
 
         self.name_help_button = tk.Button(self, image=self.help_icon, command=self.show_name_help)
@@ -55,7 +55,7 @@ class VideoConverterApp(tk.Tk):
         self.format_var = tk.StringVar(self)
         self.format_var.set("mp4")  # default format
         self.format_dropdown = tk.OptionMenu(self, self.format_var, "mp4", "mov", "avi", command=self.format_dropdown_callback)
-        self.format_dropdown.config(width=50)  # Set the width of the OptionMenu
+        self.format_dropdown.config(width=self.width)  # Set the width of the OptionMenu
         self.format_dropdown.grid(row=3, column=1, padx=self.padding_x, pady=self.padding_y)
 
         self.format_help_button = tk.Button(self, image=self.help_icon, command=self.show_format_help)
@@ -66,6 +66,18 @@ class VideoConverterApp(tk.Tk):
 
         self.convert_button = tk.Button(self, text="Convert", command=self.convert_video)
         self.convert_button.grid(row=5, column=0, columnspan=4, padx=self.padding_x, pady=self.padding_y)
+
+        # FPS Label
+        self.fps_label = tk.Label(self, text="FPS:")
+        self.fps_label.grid(row=6, column=0, padx=self.padding_x, pady=self.padding_y)
+        self.fps_value_label = tk.Label(self, text="")
+        self.fps_value_label.grid(row=6, column=1, padx=self.padding_x, pady=self.padding_y)
+
+        # Size Label
+        self.size_label = tk.Label(self, text="Size:")
+        self.size_label.grid(row=7, column=0, padx=self.padding_x, pady=self.padding_y)
+        self.size_value_label = tk.Label(self, text="")
+        self.size_value_label.grid(row=7, column=1, padx=self.padding_x, pady=self.padding_y)
 
         self.crop_area = None
 
@@ -101,6 +113,7 @@ class VideoConverterApp(tk.Tk):
 
         selector = CropSelector(input_path)
         self.crop_area = selector.select_crop_area()
+        self.update_video_info(input_path)
 
     def convert_video(self):
         input_path = self.input_path_entry.get()
@@ -165,3 +178,8 @@ class VideoConverterApp(tk.Tk):
         else:
             self.format_dropdown["menu"].entryconfigure("mov", state="normal")
             self.format_dropdown["menu"].entryconfigure("avi", state="normal")
+
+    def update_video_info(self, input_path):
+        video = VideoFileClip(input_path)
+        self.fps_value_label.config(text=f"{video.fps:.2f}")
+        self.size_value_label.config(text=f"{video.size[0]} x {video.size[1]}")
