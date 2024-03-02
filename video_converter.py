@@ -1,6 +1,8 @@
-import tkinter as tk
 import os
+import threading
+import tkinter as tk
 from tkinter import filedialog, messagebox
+import tkinter.ttk as ttk
 from moviepy.editor import VideoFileClip
 from crop_selector import CropSelector
 from PIL import Image, ImageTk
@@ -16,7 +18,13 @@ class VideoConverterApp(tk.Tk):
         self.width = 50
 
         self.create_widgets()
+        self.spinner = ttk.Progressbar(self, orient="horizontal", length=200, mode="indeterminate")
+        self.spinner.grid(row=8, column=0, columnspan=4, padx=self.padding_x, pady=self.padding_y)
 
+        # Hide spinner initially
+        self.spinner.grid_remove()
+        
+        
         self.crop_area = None
 
     def load_icons(self):
@@ -158,15 +166,29 @@ class VideoConverterApp(tk.Tk):
         video = video.crop(x1, y1, x2, y2)
 
         if output_name is None:
-            output_name = input_path.split('/')[-1].split('.')[0]  # get name from input path
+            output_name = 'converted_' + input_path.split('/')[-1].split('.')[0]  # get name from input path
 
         if output_path is None:
             output_path = '/'.join(input_path.split('/')[:-1])  # get folder from input path
 
         output_file = f"{output_path}/{output_name}.{output_format}"
+        
+        def start_spinner():
+            self.spinner.grid()
+            self.spinner.start()
 
-        video.write_videofile(output_file, codec='libx264', fps=video.fps, audio_codec='aac', preset='ultrafast')
-        messagebox.showinfo("Success", "Video conversion complete.")
+        def stop_spinner():
+            self.spinner.stop()
+            self.spinner.grid_remove()
+
+        start_spinner()
+
+        def convert_and_stop_spinner():
+            video.write_videofile(output_file, codec='libx264', fps=video.fps, audio_codec='aac', preset='ultrafast')
+            stop_spinner()
+            messagebox.showinfo("Success", "Video conversion complete.")
+
+        threading.Thread(target=convert_and_stop_spinner).start()
 
     def check_even_dimensions(self, x1, y1, x2, y2):
         width = x2 - x1
