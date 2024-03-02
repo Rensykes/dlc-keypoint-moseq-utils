@@ -10,8 +10,9 @@ from PIL import Image, ImageTk
 class VideoConverterApp(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Video Converter")
         self.load_icons()
+        self.title("DLC - Keypoint Moseq Utils")
+        self.iconbitmap(self.icon_path)  # Change the icon of the application window
 
         self.padding_x = 10
         self.padding_y = 2
@@ -23,9 +24,11 @@ class VideoConverterApp(tk.Tk):
 
     def load_icons(self):
         icons_folder = os.path.join("assets", "icons")
-        icon_path = os.path.join(icons_folder, "question_mark_2.png")
-        icon = Image.open(icon_path).resize((20, 20), Image.ANTIALIAS)
-        self.help_icon = ImageTk.PhotoImage(icon)
+        self.icon_path = os.path.join(icons_folder, "mouse_1.ico")
+
+        question_mark_icon_path = os.path.join(icons_folder, "question_mark_2.png")
+        question_mark_icon = Image.open(question_mark_icon_path).resize((20, 20), Image.ANTIALIAS)
+        self.help_icon = ImageTk.PhotoImage(question_mark_icon)
 
     def create_widgets(self):
         self.create_input_widgets()
