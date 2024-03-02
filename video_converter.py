@@ -1,49 +1,71 @@
 import tkinter as tk
+import os
 from tkinter import filedialog, messagebox
 from moviepy.editor import VideoFileClip
 from crop_selector import CropSelector
+from PIL import Image, ImageTk  # Import Image module from PIL
 
 class VideoConverterApp(tk.Tk):
     def __init__(self):
         super().__init__()
 
         self.title("Video Converter")
+        self.get_icon("question-mark.png")  # Load the icon and save it as a class attribute to avoid garbage collection by mantaining reference
+
+        self.padding_x = 10
+        self.padding_y = 2
 
         self.input_path_label = tk.Label(self, text="Input Video Path:")
-        self.input_path_label.grid(row=0, column=0)
+        self.input_path_label.grid(row=0, column=0, padx=self.padding_x, pady=self.padding_y)
 
         self.input_path_entry = tk.Entry(self, width=50)
-        self.input_path_entry.grid(row=0, column=1)
+        self.input_path_entry.grid(row=0, column=1, padx=self.padding_x, pady=self.padding_y)
 
         self.input_path_button = tk.Button(self, text="Browse", command=self.browse_input_path)
-        self.input_path_button.grid(row=0, column=2)
+        self.input_path_button.grid(row=0, column=2, padx=self.padding_x, pady=self.padding_y)
+        
+        self.input_path_help_button = tk.Button(self, image=self.help_icon, command=self.show_input_path_help)
+        self.input_path_help_button.grid(row=0, column=3, padx=self.padding_x, pady=self.padding_y)
+
 
         self.output_path_label = tk.Label(self, text="Output Video Folder:")
-        self.output_path_label.grid(row=1, column=0)
+        self.output_path_label.grid(row=1, column=0, padx=self.padding_x, pady=self.padding_y)
 
         self.output_path_entry = tk.Entry(self, width=50)
-        self.output_path_entry.grid(row=1, column=1)
+        self.output_path_entry.grid(row=1, column=1, padx=self.padding_x, pady=self.padding_y)
 
         self.output_path_button = tk.Button(self, text="Browse", command=self.browse_output_path)
-        self.output_path_button.grid(row=1, column=2)
+        self.output_path_button.grid(row=1, column=2, padx=self.padding_x, pady=self.padding_y)
+
+        self.output_path_help_button = tk.Button(self, image=self.help_icon, command=self.show_output_path_help)
+        self.output_path_help_button.grid(row=1, column=3, padx=self.padding_x, pady=self.padding_y)
 
         self.name_label = tk.Label(self, text="Output Name:")
-        self.name_label.grid(row=2, column=0)
+        self.name_label.grid(row=2, column=0, padx=self.padding_x, pady=self.padding_y)
 
-        self.name_entry = tk.Entry(self)
-        self.name_entry.grid(row=2, column=1)
+        self.name_entry = tk.Entry(self, width=50)
+        self.name_entry.grid(row=2, column=1, padx=self.padding_x, pady=self.padding_y)
+
+        self.name_help_button = tk.Button(self, image=self.help_icon, command=self.show_name_help)
+        self.name_help_button.grid(row=2, column=2, padx=self.padding_x, pady=self.padding_y)
 
         self.format_label = tk.Label(self, text="Output Format:")
-        self.format_label.grid(row=3, column=0)
+        self.format_label.grid(row=3, column=0, padx=self.padding_x, pady=self.padding_y)
 
-        self.format_entry = tk.Entry(self)
-        self.format_entry.grid(row=3, column=1)
+        self.format_var = tk.StringVar(self)
+        self.format_var.set("mp4")  # default format
+        self.format_dropdown = tk.OptionMenu(self, self.format_var, "mp4", "mov", "avi", command=self.format_dropdown_callback)
+        self.format_dropdown.config(width=50)  # Set the width of the OptionMenu
+        self.format_dropdown.grid(row=3, column=1, padx=self.padding_x, pady=self.padding_y)
+
+        self.format_help_button = tk.Button(self, image=self.help_icon, command=self.show_format_help)
+        self.format_help_button.grid(row=3, column=2, padx=self.padding_x, pady=self.padding_y)
 
         self.crop_button = tk.Button(self, text="Select Crop Area", command=self.select_crop_area)
-        self.crop_button.grid(row=4, column=0, columnspan=3)
+        self.crop_button.grid(row=4, column=0, columnspan=4, padx=self.padding_x, pady=self.padding_y)
 
         self.convert_button = tk.Button(self, text="Convert", command=self.convert_video)
-        self.convert_button.grid(row=5, column=0, columnspan=3)
+        self.convert_button.grid(row=5, column=0, columnspan=4, padx=self.padding_x, pady=self.padding_y)
 
         self.crop_area = None
 
@@ -59,6 +81,18 @@ class VideoConverterApp(tk.Tk):
             self.output_path_entry.delete(0, tk.END)
             self.output_path_entry.insert(0, output_path)
 
+    def show_input_path_help(self):
+        messagebox.showinfo("Input Path", "Select the path of the input video.")
+
+    def show_output_path_help(self):
+        messagebox.showinfo("Output Path", "Select the folder where the converted video will be saved.")
+
+    def show_name_help(self):
+        messagebox.showinfo("Output Name", "Specify the name of the output video file (optional).")
+
+    def show_format_help(self):
+        messagebox.showinfo("Output Format", "Select the desired output format for the converted video.")
+
     def select_crop_area(self):
         input_path = self.input_path_entry.get()
         if not input_path:
@@ -70,36 +104,36 @@ class VideoConverterApp(tk.Tk):
 
     def convert_video(self):
         input_path = self.input_path_entry.get()
-        output_path = self.output_path_entry.get()
-        output_format = self.format_entry.get()
-        output_name = self.name_entry.get()
+        output_path = self.output_path_entry.get() or None  # use None if not set
+        output_format = self.format_var.get()
+        output_name = self.name_entry.get() or None  # use None if not set
 
-        if not (input_path and output_path and output_format and output_name):
-            messagebox.showerror("Error", "Please fill in all fields.")
+        if not input_path:
+            messagebox.showerror("Error", "Please select input video path.")
             return
 
         if not self.crop_area:
-            messagebox.showerror("Error", "Please select crop area first.")
+            messagebox.showerror("Error", "Please select crop area.")
             return
 
-        output_file = f"{output_path}/{output_name}.{output_format}"
         video = VideoFileClip(input_path)
 
         x1, y1, x2, y2 = self.crop_area
-
         x1, y1, x2, y2 = self.check_even_dimensions(x1, y1, x2, y2)
 
         video = video.crop(x1, y1, x2, y2)
 
+        if output_name is None:
+            output_name = input_path.split('/')[-1].split('.')[0]  # get name from input path
+
+        if output_path is None:
+            output_path = '/'.join(input_path.split('/')[:-1])  # get folder from input path
+
+        output_file = f"{output_path}/{output_name}.{output_format}"
+
         video.write_videofile(output_file, codec='libx264', fps=video.fps, audio_codec='aac', preset='ultrafast')
         messagebox.showinfo("Success", "Video conversion complete.")
 
-    '''
-    Utility method used to check if the width and height of the cropped video are even.
-    https://zulko.github.io/moviepy/FAQ.html#moviepy-generated-a-video-that-cannot-be-read-by-my-favorite-player
-    One of the video s dimensions were not even, for instance 720x405, and you used a MPEG4 codec like libx264 (default in MoviePy). 
-    In this case the video generated uses a format that is readable only on some readers like VLC.
-    '''
     def check_even_dimensions(self, x1, y1, x2, y2):
         width = x2 - x1
         height = y2 - y1
@@ -111,6 +145,23 @@ class VideoConverterApp(tk.Tk):
             print("Width not even, reducing it by 1")
         if height % 2 != 0:
             y2 -= 1
-            print("Width not even, reducing it by 1")
+            print("Height not even, reducing it by 1")
 
         return x1, y1, x2, y2
+
+    def get_icon(self, filename):
+        icons_folder = os.path.join("assets", "icons")  # Create a path to the "assets/icons" directory
+        icon_path = os.path.join(icons_folder, filename)  # Create the full path to the icon file
+        icon = Image.open(icon_path)  # Load the image file
+        icon = icon.resize((20, 20), Image.ANTIALIAS)  # Resize the image to desired dimensions
+        icon = ImageTk.PhotoImage(icon)  # Convert image to Tkinter PhotoImage
+        self.help_icon = icon
+
+    def format_dropdown_callback(self, value):
+        # Disable options other than "mp4"
+        if value != "mp4":
+            self.format_dropdown["menu"].entryconfigure("mov", state="disabled")
+            self.format_dropdown["menu"].entryconfigure("avi", state="disabled")
+        else:
+            self.format_dropdown["menu"].entryconfigure("mov", state="normal")
+            self.format_dropdown["menu"].entryconfigure("avi", state="normal")
