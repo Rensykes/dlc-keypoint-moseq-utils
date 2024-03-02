@@ -1,5 +1,6 @@
 import os
 import threading
+import configparser
 import tkinter as tk
 from tkinter import filedialog, messagebox
 import tkinter.ttk as ttk
@@ -18,10 +19,33 @@ class VideoConverterApp(tk.Tk):
         self.padding_y = 2
         self.width = 50
 
+        self.load_settings()
         self.create_widgets()
         self.create_menu()
         
         self.crop_area = None
+
+    def load_settings(self):
+        """
+        Load settings from the configuration file.
+        """
+        self.settings_file = "settings.ini"
+        self.converted_video_prefix = "converted_"
+        if os.path.exists(self.settings_file):
+            config = configparser.ConfigParser()
+            config.read(self.settings_file)
+            if "Settings" in config:
+                self.converted_video_prefix = config["Settings"].get("converted_video_prefix", "")
+
+    def save_settings(self):
+        """
+        Save settings to the configuration file.
+        """
+        config = configparser.ConfigParser()
+        config["Settings"] = {"converted_video_prefix": self.converted_video_prefix}
+        with open(self.settings_file, "w") as config_file:
+            config.write(config_file)
+
 
     def load_icons(self):
         icons_folder = os.path.join("assets", "icons")
@@ -76,7 +100,11 @@ class VideoConverterApp(tk.Tk):
 
         # Apply and Cancel buttons
         def apply_settings():
-            self.converted_video_prefix = text_area.get("1.0", "end-1c")
+            new_video_prefix = text_area.get("1.0", "end-1c")
+            if not new_video_prefix.endswith('_'):
+                new_video_prefix += '_'
+            self.converted_video_prefix = new_video_prefix
+            self.save_settings()
             settings_window.destroy()
 
         def cancel_settings():
@@ -229,10 +257,7 @@ class VideoConverterApp(tk.Tk):
         video = video.crop(x1, y1, x2, y2)
 
         if output_name is None:
-            prefix = 'converted_'
-            if self.converted_video_prefix is not None:
-                prefix = self.converted_video_prefix + '_'
-            output_name = prefix + input_path.split('/')[-1].split('.')[0]  # get name from input path
+            output_name = self.converted_video_prefix + input_path.split('/')[-1].split('.')[0]  # get name from input path
 
         if output_path is None:
             output_path = '/'.join(input_path.split('/')[:-1])  # get folder from input path
