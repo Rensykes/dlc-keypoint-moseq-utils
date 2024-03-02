@@ -18,12 +18,6 @@ class VideoConverterApp(tk.Tk):
         self.width = 50
 
         self.create_widgets()
-        self.spinner = ttk.Progressbar(self, orient="horizontal", length=200, mode="indeterminate")
-        self.spinner.grid(row=8, column=0, columnspan=4, padx=self.padding_x, pady=self.padding_y)
-
-        # Hide spinner initially
-        self.spinner.grid_remove()
-        
         
         self.crop_area = None
 
@@ -41,6 +35,7 @@ class VideoConverterApp(tk.Tk):
         self.create_info_widgets()
         self.create_crop_widgets()
         self.create_conversion_widgets()
+        self.create_progress_spinner()
 
     def create_input_widgets(self):
         self.input_path_label = tk.Label(self, text="Input Video Path:")
@@ -109,6 +104,14 @@ class VideoConverterApp(tk.Tk):
     def create_conversion_widgets(self):
         self.convert_button = tk.Button(self, text="Convert", command=self.convert_video)
         self.convert_button.grid(row=7, column=0, columnspan=4, padx=self.padding_x, pady=self.padding_y)
+        
+    def create_progress_spinner(self):
+        self.spinner = ttk.Progressbar(self, orient="horizontal", length=200, mode="indeterminate")
+        self.spinner.grid(row=8, column=0, columnspan=4, padx=self.padding_x, pady=self.padding_y)
+
+        # Hide spinner initially
+        self.spinner.grid_remove()
+        
 
     def browse_input_path(self):
         input_path = filedialog.askopenfilename(filetypes=[("Video Files", "*.mp4 *.avi *.mkv *.mov")])
