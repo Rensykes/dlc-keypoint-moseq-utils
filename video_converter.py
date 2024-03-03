@@ -1,7 +1,9 @@
 import os
 import threading
-import configparser
 import tkinter as tk
+from settings import SettingsWindow
+from persist_settings import load_settings, save_settings
+from icon_loader import load_icons
 from tkinter import filedialog, messagebox
 import tkinter.ttk as ttk
 from moviepy.editor import VideoFileClip
@@ -11,9 +13,9 @@ from PIL import Image, ImageTk
 class VideoConverterApp(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.load_icons()
+        self.icons = load_icons()
         self.title("DLC - Keypoint Moseq Utils")
-        self.iconbitmap(self.icon_path)  # Change the icon of the application window
+        self.wm_iconphoto(True, self.icons["main_icon"])  # Set the window icon
 
         self.padding_x = 10
         self.padding_y = 2
@@ -29,32 +31,14 @@ class VideoConverterApp(tk.Tk):
         """
         Load settings from the configuration file.
         """
-        self.settings_file = "settings.ini"
-        self.converted_video_prefix = "converted_"
-        if os.path.exists(self.settings_file):
-            config = configparser.ConfigParser()
-            config.read(self.settings_file)
-            if "Settings" in config:
-                self.converted_video_prefix = config["Settings"].get("converted_video_prefix", "")
+        self.settings = load_settings()
 
-    def save_settings(self):
+    def save_settings(self, **kwargs):
         """
         Save settings to the configuration file.
         """
-        config = configparser.ConfigParser()
-        config["Settings"] = {"converted_video_prefix": self.converted_video_prefix}
-        with open(self.settings_file, "w") as config_file:
-            config.write(config_file)
-
-
-    def load_icons(self):
-        icons_folder = os.path.join("assets", "icons")
-        self.icon_path = os.path.join(icons_folder, "mouse_1.ico")
-
-        question_mark_icon_path = os.path.join(icons_folder, "question_mark_2.png")
-        question_mark_icon = Image.open(question_mark_icon_path).resize((20, 20), Image.ANTIALIAS)
-        self.help_icon = ImageTk.PhotoImage(question_mark_icon)
-
+        save_settings(**kwargs)
+        
     def create_menu(self):
         """
         Create menu bar.
@@ -79,41 +63,7 @@ class VideoConverterApp(tk.Tk):
         self.config(menu=menu_bar)
 
     def open_settings_window(self):
-        """
-        Open a new window to display settings.
-        """
-        settings_window = tk.Toplevel(self)
-        settings_window.title("Settings")
-        
-        # Label and text area
-        label = tk.Label(settings_window, text="Default converted video prefix:")
-        label.grid(row=0, column=0, padx=10, pady=5, sticky="w")
-        text_area = tk.Text(settings_window, height=1, width=30)
-        text_area.grid(row=0, column=1, padx=10, pady=5, sticky="we")
-        
-        # Button with icon
-        def show_message():
-            messagebox.showinfo("Default converted video prefix", "When the input field Output Name is not filled, the video will be saved using the following format: <prefix>_<old_video_name>")
-
-        button = tk.Button(settings_window, image=self.help_icon, command=show_message)
-        button.grid(row=0, column=2, padx=10, pady=5)
-
-        # Apply and Cancel buttons
-        def apply_settings():
-            new_video_prefix = text_area.get("1.0", "end-1c")
-            if not new_video_prefix.endswith('_'):
-                new_video_prefix += '_'
-            self.converted_video_prefix = new_video_prefix
-            self.save_settings()
-            settings_window.destroy()
-
-        def cancel_settings():
-            settings_window.destroy()
-
-        apply_button = tk.Button(settings_window, text="Apply", command=apply_settings)
-        apply_button.grid(row=1, column=1, padx=5, pady=10, sticky="e")
-        cancel_button = tk.Button(settings_window, text="Cancel", command=cancel_settings)
-        cancel_button.grid(row=1, column=2, padx=5, pady=10, sticky="e")
+        settings_window = SettingsWindow(self)
 
     def create_widgets(self):
         self.create_input_widgets()
@@ -135,7 +85,7 @@ class VideoConverterApp(tk.Tk):
         self.input_path_button = tk.Button(self, text="Browse", command=self.browse_input_path)
         self.input_path_button.grid(row=0, column=2, padx=self.padding_x, pady=self.padding_y)
         
-        self.input_path_help_button = tk.Button(self, image=self.help_icon, borderwidth=0, highlightthickness=0, relief=tk.FLAT, command=self.show_input_path_help)
+        self.input_path_help_button = tk.Button(self, image=self.icons["help_icon"], borderwidth=0, highlightthickness=0, relief=tk.FLAT, command=self.show_input_path_help)
         self.input_path_help_button.grid(row=0, column=3, padx=self.padding_x, pady=self.padding_y)
 
     def create_output_widgets(self):
@@ -148,7 +98,7 @@ class VideoConverterApp(tk.Tk):
         self.output_path_button = tk.Button(self, text="Browse", command=self.browse_output_path)
         self.output_path_button.grid(row=1, column=2, padx=self.padding_x, pady=self.padding_y)
 
-        self.output_path_help_button = tk.Button(self, image=self.help_icon, borderwidth=0, highlightthickness=0, relief=tk.FLAT, command=self.show_output_path_help)
+        self.output_path_help_button = tk.Button(self, image=self.icons["help_icon"], borderwidth=0, highlightthickness=0, relief=tk.FLAT, command=self.show_output_path_help)
         self.output_path_help_button.grid(row=1, column=3, padx=self.padding_x, pady=self.padding_y)
 
     def create_name_widgets(self):
@@ -158,7 +108,7 @@ class VideoConverterApp(tk.Tk):
         self.name_entry = tk.Entry(self, width=self.width)
         self.name_entry.grid(row=2, column=1, padx=self.padding_x, pady=self.padding_y)
 
-        self.name_help_button = tk.Button(self, image=self.help_icon, borderwidth=0, highlightthickness=0, relief=tk.FLAT, command=self.show_name_help)
+        self.name_help_button = tk.Button(self, image=self.icons["help_icon"], borderwidth=0, highlightthickness=0, relief=tk.FLAT, command=self.show_name_help)
         self.name_help_button.grid(row=2, column=2, padx=self.padding_x, pady=self.padding_y)
 
     def create_format_widgets(self):
@@ -171,7 +121,7 @@ class VideoConverterApp(tk.Tk):
         self.format_dropdown.config(width=self.width)  # Set the width of the OptionMenu
         self.format_dropdown.grid(row=3, column=1, padx=self.padding_x, pady=self.padding_y)
 
-        self.format_help_button = tk.Button(self, image=self.help_icon, borderwidth=0, highlightthickness=0, relief=tk.FLAT, command=self.show_format_help)
+        self.format_help_button = tk.Button(self, image=self.icons["help_icon"], borderwidth=0, highlightthickness=0, relief=tk.FLAT, command=self.show_format_help)
         self.format_help_button.grid(row=3, column=2, padx=self.padding_x, pady=self.padding_y)
 
     def create_info_widgets(self):
@@ -257,7 +207,7 @@ class VideoConverterApp(tk.Tk):
         video = video.crop(x1, y1, x2, y2)
 
         if output_name is None:
-            output_name = self.converted_video_prefix + input_path.split('/')[-1].split('.')[0]  # get name from input path
+            output_name = self.settings["converted_video_prefix"] + input_path.split('/')[-1].split('.')[0]  # get name from input path
 
         if output_path is None:
             output_path = '/'.join(input_path.split('/')[:-1])  # get folder from input path
@@ -275,11 +225,21 @@ class VideoConverterApp(tk.Tk):
         start_spinner()
 
         def convert_and_stop_spinner():
+            self.rename_original_video(input_path=input_path, output_path=output_path, output_format=output_format)
             video.write_videofile(output_file, codec='libx264', fps=video.fps, audio_codec='aac', preset='ultrafast')
             stop_spinner()
             messagebox.showinfo("Success", "Video conversion complete.")
 
         threading.Thread(target=convert_and_stop_spinner).start()
+        
+    def rename_original_video(self, input_path, output_path, output_format):
+        if self.settings["rename_original_video"]:
+            original_video_prefix = self.settings["original_video_prefix"]
+            original_name = input_path.split('/')[-1].split('.')[0]
+            new_name = original_video_prefix + original_name
+            original_file_path = '/'.join(input_path.split('/')[:-1])
+            new_file_path = output_path  # Assuming both original and converted videos should be in the same folder
+            os.rename(input_path, os.path.join(new_file_path, new_name + '.' + output_format))
 
     def check_even_dimensions(self, x1, y1, x2, y2):
         width = x2 - x1
