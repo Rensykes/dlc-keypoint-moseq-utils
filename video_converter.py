@@ -225,11 +225,21 @@ class VideoConverterApp(tk.Tk):
         start_spinner()
 
         def convert_and_stop_spinner():
+            self.rename_original_video(input_path=input_path, output_path=output_path, output_format=output_format)
             video.write_videofile(output_file, codec='libx264', fps=video.fps, audio_codec='aac', preset='ultrafast')
             stop_spinner()
             messagebox.showinfo("Success", "Video conversion complete.")
 
         threading.Thread(target=convert_and_stop_spinner).start()
+        
+    def rename_original_video(self, input_path, output_path, output_format):
+        if self.settings["rename_original_video"]:
+            original_video_prefix = self.settings["original_video_prefix"]
+            original_name = input_path.split('/')[-1].split('.')[0]
+            new_name = original_video_prefix + original_name
+            original_file_path = '/'.join(input_path.split('/')[:-1])
+            new_file_path = output_path  # Assuming both original and converted videos should be in the same folder
+            os.rename(input_path, os.path.join(new_file_path, new_name + '.' + output_format))
 
     def check_even_dimensions(self, x1, y1, x2, y2):
         width = x2 - x1
