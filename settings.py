@@ -24,6 +24,9 @@ class SettingsWindow(tk.Toplevel):
         self.rename_checkbox = tk.Checkbutton(self, text="Rename video upon conversion", variable=self.rename_var,
                                               command=self.toggle_prefix_entry)
         self.rename_checkbox.grid(row=1, column=0, columnspan=2, padx=10, pady=5, sticky="w")
+        
+        # Add command to toggle_prefix_entry when checkbox state changes
+        self.rename_var.trace_add("write", lambda *args: self.toggle_prefix_entry())
 
         # Prefix to add to the original video upon conversion
         self.prefix_label = tk.Label(self, text="Prefix to add to the original video upon conversion:")
@@ -80,6 +83,8 @@ class SettingsWindow(tk.Toplevel):
         messagebox.showinfo("Default converted video prefix", "When the input field Output Name is not filled, the video will be saved using the following format: <prefix>_<old_video_name>")
             
     def toggle_prefix_entry(self):
-        # Enable prefix text area if checkbox is checked, otherwise disable it
-        state = tk.NORMAL if self.rename_var.get() else tk.DISABLED
-        self.prefix_text_area.config(state=state)
+        # Disable prefix text area if checkbox is unchecked
+        if not self.rename_var.get():
+            self.prefix_text_area.config(state=tk.DISABLED)
+        else:
+            self.prefix_text_area.config(state=tk.NORMAL)
