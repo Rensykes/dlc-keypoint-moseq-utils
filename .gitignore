@@ -18,3 +18,5 @@ __pycache__/
 # Others
 *.mp4
 settings.ini
+config.yaml
+config.yml
