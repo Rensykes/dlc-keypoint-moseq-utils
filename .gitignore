@@ -19,6 +19,8 @@ __pycache__/
 *.h5
 *.csv
 *.mp4
+*.gif
+*.png
 settings.ini
 config.yaml
 config.yml
